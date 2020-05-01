@@ -1,6 +1,5 @@
 import i18next from "i18next";
 import {
-  PREFECTURE_JSON_PATH,
   PREFECTURE_PAINT,
   COLOR_YELLOW,
   COLOR_ORANGE,
@@ -11,17 +10,25 @@ import {
   COLOR_BLACK,
   COLOR_NONE,
 } from "../../data/constants";
+
+const PREFECTURE_JSON_PATH = "static/prefectures.geojson";
+let pageDrawCount = 0;
+
 /**
  * drawMapPrefectures
  * @param {*} pageDraws - number of redraws to screen
  */
-const drawMapPrefectures = (pageDraws, ddb, map) => {
+const drawMapPrefectures = (ddb, map) => {
   // Find the index of the first symbol layer
   // in the map style so we can draw the
   // prefecture colors behind it
 
   let firstSymbolId;
   const { layers = [] } = map.getStyle();
+  if (!layers) {
+    return;
+  }
+
   for (let i = 0; i < layers.length; i++) {
     if (layers[i].type === "symbol") {
       firstSymbolId = layers[i].id;
@@ -59,9 +66,9 @@ const drawMapPrefectures = (pageDraws, ddb, map) => {
   // Add a final value to the list for the default color
   prefecturePaint.push(COLOR_NONE);
 
-  if (pageDraws === 0) {
+  if (pageDrawCount === 0) {
+    pageDrawCount++;
     // If it is the first time drawing the map
-
     map.addSource("prefectures", {
       type: "geojson",
       data: PREFECTURE_JSON_PATH,
@@ -107,6 +114,8 @@ const drawMapPrefectures = (pageDraws, ddb, map) => {
   const popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false,
+    offset: 25,
+    className: "popup-content",
   });
 
   map.on("mousemove", function (e) {
